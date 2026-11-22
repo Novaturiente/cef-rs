@@ -65,6 +65,6 @@ fn test_init_cef() {
 
         assert_eq!(initialize(None, None, None, ptr::null_mut()), 0);
 
-        let _ = api_hash(sys::CEF_API_VERSION_LAST, 0);
+        let _ = api_hash(sys::CEF_API_VERSION_EXPERIMENTAL, 0);
     });
 }

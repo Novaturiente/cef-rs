@@ -24240,6 +24240,17 @@ pub trait ImplRenderHandler: Clone + Sized + Rc {
         input_mode: TextInputMode,
     ) {
     }
+    #[doc = "See [`_cef_render_handler_t::on_accelerated_paint2`] for more documentation."]
+    fn on_accelerated_paint2(
+        &self,
+        browser: Option<&mut Browser>,
+        type_: PaintElementType,
+        dirty_rects: Option<&[Rect]>,
+        info: Option<&AcceleratedPaintInfo>,
+        callback: Option<&mut Callback>,
+    ) -> ::std::os::raw::c_int {
+        Default::default()
+    }
     fn init_methods(object: &mut _cef_render_handler_t) {
         impl_cef_render_handler_t::init_methods::<Self, _cef_render_handler_t>(object);
     }
@@ -24268,6 +24279,7 @@ mod impl_cef_render_handler_t {
         object.on_ime_composition_range_changed = Some(on_ime_composition_range_changed::<I, R>);
         object.on_text_selection_changed = Some(on_text_selection_changed::<I, R>);
         object.on_virtual_keyboard_requested = Some(on_virtual_keyboard_requested::<I, R>);
+        object.on_accelerated_paint2 = Some(on_accelerated_paint2::<I, R>);
     }
     extern "C" fn get_accessibility_handler<I: ImplRenderHandler, R: Rc>(
         self_: *mut _cef_render_handler_t,
@@ -24698,6 +24710,65 @@ mod impl_cef_render_handler_t {
             &arg_self_.interface,
             arg_browser,
             arg_input_mode,
+        )
+    }
+    extern "C" fn on_accelerated_paint2<I: ImplRenderHandler, R: Rc>(
+        self_: *mut _cef_render_handler_t,
+        browser: *mut _cef_browser_t,
+        type_: cef_paint_element_type_t,
+        dirty_rects_count: usize,
+        dirty_rects: *const _cef_rect_t,
+        info: *const _cef_accelerated_paint_info_t,
+        callback: *mut _cef_callback_t,
+    ) -> ::std::os::raw::c_int {
+        let (
+            arg_self_,
+            arg_browser,
+            arg_type_,
+            arg_dirty_rects_count,
+            arg_dirty_rects,
+            arg_info,
+            arg_callback,
+        ) = (
+            self_,
+            browser,
+            type_,
+            dirty_rects_count,
+            dirty_rects,
+            info,
+            callback,
+        );
+        let arg_self_: &RcImpl<R, I> = RcImpl::get(arg_self_.cast());
+        let mut arg_browser =
+            unsafe { arg_browser.as_mut() }.map(|arg| Browser(unsafe { RefGuard::from_raw(arg) }));
+        let arg_browser = arg_browser.as_mut();
+        let arg_type_ = arg_type_.into_raw();
+        let arg_dirty_rects = if arg_dirty_rects.is_null() {
+            None
+        } else {
+            let arg_dirty_rects =
+                unsafe { std::slice::from_raw_parts(arg_dirty_rects, arg_dirty_rects_count) };
+            let arg_dirty_rects: Vec<_> =
+                arg_dirty_rects.iter().map(|elem| (*elem).into()).collect();
+            Some(arg_dirty_rects)
+        };
+        let arg_dirty_rects = arg_dirty_rects.as_deref();
+        let arg_info = if arg_info.is_null() {
+            None
+        } else {
+            Some(WrapParamRef::<AcceleratedPaintInfo, _>::from(arg_info))
+        };
+        let arg_info = arg_info.as_ref().map(|arg| arg.as_ref());
+        let mut arg_callback = unsafe { arg_callback.as_mut() }
+            .map(|arg| Callback(unsafe { RefGuard::from_raw(arg) }));
+        let arg_callback = arg_callback.as_mut();
+        ImplRenderHandler::on_accelerated_paint2(
+            &arg_self_.interface,
+            arg_browser,
+            arg_type_,
+            arg_dirty_rects,
+            arg_info,
+            arg_callback,
         )
     }
 }
@@ -25184,6 +25255,66 @@ impl ImplRenderHandler for RenderHandler {
                 let arg_input_mode = arg_input_mode.into_raw();
                 f(arg_self_, arg_browser, arg_input_mode);
             }
+        }
+    }
+    fn on_accelerated_paint2(
+        &self,
+        browser: Option<&mut Browser>,
+        type_: PaintElementType,
+        dirty_rects: Option<&[Rect]>,
+        info: Option<&AcceleratedPaintInfo>,
+        callback: Option<&mut Callback>,
+    ) -> ::std::os::raw::c_int {
+        unsafe {
+            self.0
+                .on_accelerated_paint2
+                .map(|f| {
+                    let (arg_browser, arg_type_, arg_dirty_rects, arg_info, arg_callback) =
+                        (browser, type_, dirty_rects, info, callback);
+                    let arg_self_ = self.into_raw();
+                    let arg_browser = arg_browser
+                        .map(|arg| {
+                            arg.add_ref();
+                            ImplBrowser::get_raw(arg)
+                        })
+                        .unwrap_or(std::ptr::null_mut());
+                    let arg_type_ = arg_type_.into_raw();
+                    let arg_dirty_rects_count = arg_dirty_rects
+                        .as_ref()
+                        .map(|arg| arg.len())
+                        .unwrap_or_default();
+                    let vec_dirty_rects = arg_dirty_rects
+                        .as_ref()
+                        .map(|arg| arg.iter().map(|elem| elem.get_raw()).collect::<Vec<_>>())
+                        .unwrap_or_default();
+                    let arg_dirty_rects = if vec_dirty_rects.is_empty() {
+                        std::ptr::null()
+                    } else {
+                        vec_dirty_rects.as_ptr()
+                    };
+                    let arg_info = arg_info.cloned().map(|arg| arg.into());
+                    let arg_info = arg_info
+                        .as_ref()
+                        .map(std::ptr::from_ref)
+                        .unwrap_or(std::ptr::null());
+                    let arg_callback = arg_callback
+                        .map(|arg| {
+                            arg.add_ref();
+                            ImplCallback::get_raw(arg)
+                        })
+                        .unwrap_or(std::ptr::null_mut());
+                    let result = f(
+                        arg_self_,
+                        arg_browser,
+                        arg_type_,
+                        arg_dirty_rects_count,
+                        arg_dirty_rects,
+                        arg_info,
+                        arg_callback,
+                    );
+                    result.wrap_result()
+                })
+                .unwrap_or_default()
         }
     }
     fn get_raw(&self) -> *mut _cef_render_handler_t {

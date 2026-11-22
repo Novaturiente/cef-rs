@@ -29738,10 +29738,22 @@ pub struct _cef_render_handler_t {
             input_mode: cef_text_input_mode_t,
         ),
     >,
+    #[doc = "\n Called when an element has been rendered to the shared texture handle.\n Same as the variant without |callback|, except that the resource described\n by |info|, including its handles, stays valid and unmodified until the\n frame is released. Executing |callback| (Continue or Cancel) or releasing\n its last reference releases the frame once this call returns; do either on\n any thread once all GPU work that reads the resource has completed. |info|\n itself is only valid during this call, so copy any values needed later. At\n most 4 frames are held per popup or page, and a new popup or page, such as\n after a cross-site navigation, starts a new count. Further paints are\n dropped until one is released, and the popup or page is then repainted\n whole. Return true (1) to handle the paint, or false (0) to call the\n variant without |callback| instead.\n"]
+    pub on_accelerated_paint2: ::std::option::Option<
+        unsafe extern "C" fn(
+            self_: *mut _cef_render_handler_t,
+            browser: *mut _cef_browser_t,
+            type_: cef_paint_element_type_t,
+            dirtyRectsCount: usize,
+            dirtyRects: *const cef_rect_t,
+            info: *const cef_accelerated_paint_info_t,
+            callback: *mut _cef_callback_t,
+        ) -> ::std::os::raw::c_int,
+    >,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of _cef_render_handler_t"][::std::mem::size_of::<_cef_render_handler_t>() - 176usize];
+    ["Size of _cef_render_handler_t"][::std::mem::size_of::<_cef_render_handler_t>() - 184usize];
     ["Alignment of _cef_render_handler_t"]
         [::std::mem::align_of::<_cef_render_handler_t>() - 8usize];
     ["Offset of field: _cef_render_handler_t::base"]
@@ -29782,6 +29794,8 @@ const _: () = {
         [::std::mem::offset_of!(_cef_render_handler_t, on_text_selection_changed) - 160usize];
     ["Offset of field: _cef_render_handler_t::on_virtual_keyboard_requested"]
         [::std::mem::offset_of!(_cef_render_handler_t, on_virtual_keyboard_requested) - 168usize];
+    ["Offset of field: _cef_render_handler_t::on_accelerated_paint2"]
+        [::std::mem::offset_of!(_cef_render_handler_t, on_accelerated_paint2) - 176usize];
 };
 #[doc = "\n Implement this structure to handle events when window rendering is disabled.\n The functions of this structure will be called on the UI thread.\n\n NOTE: This struct is allocated client-side.\n"]
 pub type cef_render_handler_t = _cef_render_handler_t;

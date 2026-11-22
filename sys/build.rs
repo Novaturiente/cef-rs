@@ -135,7 +135,11 @@ fn main() -> anyhow::Result<()> {
     // the macOS loader in `libcef_dll_dylib.cc` also resolves experimental
     // entry points, and loading any libcef but this exact build fails on the
     // first one missing.
-    let api_version = cef_api_version_last(&cef_dir)?;
+    // novabrowser: the experimental API (999999), which declares
+    // `on_accelerated_paint2` (CEF PR #4358 in our own CEF build); the app
+    // declares the same through `api_hash(CEF_API_VERSION_EXPERIMENTAL)`.
+    let _ = cef_api_version_last(&cef_dir)?;
+    let api_version = 999999;
     println!("cargo::metadata=CEF_API_VERSION={api_version}");
 
     let mut cef_dll_wrapper = cmake::Config::new(&cef_dir);
